@@ -1,8 +1,11 @@
-# kg – Kato Git
+![Banner](img/banner.png)
+
+
+# Kato
 
 > Small, unobtrusive Git superpowers in your terminal.
 
-`kg` is a native CLI tool that enhances common Git workflows with interactive
+`kato` is a native CLI tool that enhances common Git workflows with interactive
 pickers and safer defaults. It shells out to the installed `git` binary, so it
 works with your existing Git configuration.
 
