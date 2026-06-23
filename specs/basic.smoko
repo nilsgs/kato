@@ -1,0 +1,20 @@
+Feature: kg basic
+
+  Scenario: version flag prints version
+    When I run "kg --version"
+    Then exit code is 0
+    And output contains "0.1.0"
+
+  Scenario: help flag lists branch command
+    When I run "kg --help"
+    Then exit code is 0
+    And output contains "branch"
+
+  Scenario: branch help describes the command
+    When I run "kg branch --help"
+    Then exit code is 0
+    And output contains "branch"
+
+  Scenario: branch in non-git directory fails
+    When I run "kg branch"
+    Then exit code is not 0

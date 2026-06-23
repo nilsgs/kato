@@ -1,0 +1,11 @@
+FROM golang:1.26 AS builder
+WORKDIR /build
+COPY src/ .
+RUN go build -o /usr/local/bin/kg .
+
+FROM debian:bookworm-slim
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /usr/local/bin/kg /usr/local/bin/kg
+WORKDIR /smoko-work

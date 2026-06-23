@@ -1,0 +1,92 @@
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the local binary
+    dir: src
+    cmds:
+      - cmd: |
+          $v = (Get-Content ..\VERSION -Raw).Trim()
+          $c = try { git -C .. rev-parse --short HEAD 2>$null } catch { 'unknown' }
+          if (-not $c) { $c = 'unknown' }
+          go build -ldflags "-s -w -X kato/cmd.version=$v -X kato/cmd.commit=$c" -o ..\kg.exe .
+        platforms: [windows]
+      - cmd: |
+          v="$(tr -d '\r\n' < ../VERSION)"
+          c="$(git -C .. rev-parse --short HEAD 2>/dev/null || printf unknown)"
+          go build -ldflags "-s -w -X kato/cmd.version=${v} -X kato/cmd.commit=${c}" -o ../kg .
+        platforms: [linux, darwin]
+
+  test:
+    desc: Run native Go tests
+    dir: src
+    cmds:
+      - go test ./... -v -count=1
+
+  smoke:
+    desc: Run Smoko smoke specs
+    cmds:
+      - smoko run specs/ --parallel 0
+
+  ci:
+    desc: Run test, build, and smoke
+    cmds:
+      - task: test
+      - task: build
+      - task: smoke
+
+  cross:
+    desc: Build the full OS/architecture matrix into dist/
+    dir: src
+    cmds:
+      - cmd: |
+          $v = (Get-Content ..\VERSION -Raw).Trim()
+          $c = try { git -C .. rev-parse --short HEAD 2>$null } catch { 'unknown' }
+          if (-not $c) { $c = 'unknown' }
+          $f = "-s -w -X kato/cmd.version=$v -X kato/cmd.commit=$c"
+          New-Item -ItemType Directory -Force -Path ..\dist | Out-Null
+          foreach ($t in @(
+            'linux/amd64/kg-linux-amd64',
+            'linux/arm64/kg-linux-arm64',
+            'darwin/amd64/kg-darwin-amd64',
+            'darwin/arm64/kg-darwin-arm64',
+            'windows/amd64/kg-windows-amd64.exe',
+            'windows/arm64/kg-windows-arm64.exe'
+          )) {
+            $parts = $t -split '/'; $env:GOOS = $parts[0]; $env:GOARCH = $parts[1]
+            go build -ldflags $f -o "..\dist\$($parts[2])" .
+          }
+          Remove-Item Env:GOOS, Env:GOARCH -ErrorAction SilentlyContinue
+        platforms: [windows]
+      - cmd: |
+          v="$(tr -d '\r\n' < ../VERSION)"
+          c="$(git -C .. rev-parse --short HEAD 2>/dev/null || printf unknown)"
+          f="-s -w -X kato/cmd.version=${v} -X kato/cmd.commit=${c}"
+          mkdir -p ../dist
+          for spec in "linux amd64 kg-linux-amd64" "linux arm64 kg-linux-arm64" \
+                      "darwin amd64 kg-darwin-amd64" "darwin arm64 kg-darwin-arm64" \
+                      "windows amd64 kg-windows-amd64.exe" "windows arm64 kg-windows-arm64.exe"; do
+            set -- $spec; GOOS=$1 GOARCH=$2 go build -ldflags "$f" -o "../dist/$3" .
+          done
+        platforms: [linux, darwin]
+
+  install:
+    desc: Build and install the binary to ~/.kato/bin
+    cmds:
+      - cmd: powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1
+        platforms: [windows]
+      - cmd: sh install.sh
+        platforms: [linux, darwin]
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - cmd: powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item -ErrorAction SilentlyContinue kg.exe; if (Test-Path dist) { Remove-Item -Recurse -Force dist }"
+        platforms: [windows]
+      - cmd: rm -f kg && rm -rf dist
+        platforms: [linux, darwin]

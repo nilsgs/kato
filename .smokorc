@@ -1,0 +1,3 @@
+image = "kato-test:latest"
+timeout = 30
+build = "docker build -f Dockerfile.test -t kato-test:latest ."
