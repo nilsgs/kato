@@ -87,6 +87,46 @@ func TestListBranchesNotRepo(t *testing.T) {
 	}
 }
 
+func TestListGraph(t *testing.T) {
+	requireGit(t)
+	dir := initRepo(t)
+	inDir(t, dir)
+
+	lines, err := git.ListGraph(10, false)
+	if err != nil {
+		t.Fatalf("ListGraph: %v", err)
+	}
+	if len(lines) == 0 {
+		t.Fatal("expected at least one graph line")
+	}
+	hasCommit := false
+	for _, l := range lines {
+		if l.IsCommit() {
+			hasCommit = true
+			if l.Hash == "" {
+				t.Error("commit line has empty Hash")
+			}
+			if l.Short == "" {
+				t.Error("commit line has empty Short")
+			}
+			break
+		}
+	}
+	if !hasCommit {
+		t.Error("expected at least one commit line in graph output")
+	}
+}
+
+func TestListGraphNotRepo(t *testing.T) {
+	requireGit(t)
+	inDir(t, t.TempDir())
+
+	_, err := git.ListGraph(10, false)
+	if err == nil {
+		t.Error("expected error in non-git directory, got nil")
+	}
+}
+
 func TestRenameAndDelete(t *testing.T) {
 	requireGit(t)
 	dir := initRepo(t)

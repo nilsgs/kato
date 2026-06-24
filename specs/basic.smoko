@@ -18,3 +18,12 @@ Feature: kg basic
   Scenario: branch in non-git directory fails
     When I run "kg branch"
     Then exit code is not 0
+
+  Scenario: log help describes the command
+    When I run "kg log --help"
+    Then exit code is 0
+    And output contains "log"
+
+  Scenario: log in non-git directory fails
+    When I run "kg log"
+    Then exit code is not 0

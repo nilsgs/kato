@@ -64,6 +64,99 @@ func Delete(name string) error {
 	return err
 }
 
+// GraphLine represents one output line from git log --graph.
+type GraphLine struct {
+	Graph   string // leading graph decoration chars (e.g. "* ", "| * ", "| ")
+	Hash    string // full 40-char SHA; empty for graph-only connector lines
+	Short   string // abbreviated hash
+	Refs    string // raw ref decoration (%D), e.g. "HEAD -> main, origin/main"
+	Author  string
+	Date    string // relative date
+	Subject string
+}
+
+// IsCommit reports whether the line carries commit data.
+func (g GraphLine) IsCommit() bool { return g.Hash != "" }
+
+// ListGraph returns up to n lines of git log --graph output.
+// When all is true, --all is passed to include every branch.
+func ListGraph(n int, all bool) ([]GraphLine, error) {
+	if n <= 0 {
+		n = 100
+	}
+	args := []string{
+		"log",
+		"--graph",
+		fmt.Sprintf("--max-count=%d", n),
+		"--pretty=format:%H\t%h\t%D\t%an\t%ar\t%s",
+	}
+	if all {
+		args = append(args, "--all")
+	}
+	out, err := runGit(args...)
+	if err != nil {
+		return nil, err
+	}
+	var lines []GraphLine
+	for _, raw := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
+		if raw == "" {
+			continue
+		}
+		lines = append(lines, parseGraphLine(raw))
+	}
+	return lines, nil
+}
+
+func parseGraphLine(raw string) GraphLine {
+	tabIdx := strings.IndexByte(raw, '\t')
+	if tabIdx == -1 {
+		// Connector-only line (|, /, \, spaces — no commit data).
+		return GraphLine{Graph: raw}
+	}
+	graphAndHash := raw[:tabIdx]
+	rest := raw[tabIdx+1:]
+	gl := GraphLine{}
+	// The full hash is the last 40 hex chars of the graph+hash segment.
+	if len(graphAndHash) >= 40 && isHex(graphAndHash[len(graphAndHash)-40:]) {
+		gl.Hash = graphAndHash[len(graphAndHash)-40:]
+		gl.Graph = graphAndHash[:len(graphAndHash)-40]
+	} else {
+		gl.Graph = graphAndHash
+	}
+	parts := strings.SplitN(rest, "\t", 5)
+	if len(parts) > 0 {
+		gl.Short = parts[0]
+	}
+	if len(parts) > 1 {
+		gl.Refs = parts[1]
+	}
+	if len(parts) > 2 {
+		gl.Author = parts[2]
+	}
+	if len(parts) > 3 {
+		gl.Date = parts[3]
+	}
+	if len(parts) > 4 {
+		gl.Subject = parts[4]
+	}
+	return gl
+}
+
+func isHex(s string) bool {
+	for _, c := range s {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+			return false
+		}
+	}
+	return len(s) > 0
+}
+
+// CommitDetail returns the full output of git show for the given hash,
+// including author, date, full commit message, and diff stat.
+func CommitDetail(hash string) (string, error) {
+	return runGit("show", "--stat", hash)
+}
+
 // runGit runs git with the given arguments and returns combined stdout.
 // On non-zero exit it returns an error containing the stderr message.
 func runGit(args ...string) (string, error) {

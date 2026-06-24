@@ -21,6 +21,9 @@ func TestRootHelp(t *testing.T) {
 	if !strings.Contains(got, "branch") {
 		t.Errorf("expected help to mention 'branch' subcommand, got:\n%s", got)
 	}
+	if !strings.Contains(got, "log") {
+		t.Errorf("expected help to mention 'log' subcommand, got:\n%s", got)
+	}
 }
 
 func TestRootVersion(t *testing.T) {

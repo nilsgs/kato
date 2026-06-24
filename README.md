@@ -24,33 +24,14 @@ to your PATH.
 
 ## Commands
 
-| Command | Purpose |
-|---|---|
-| `kg branch` | Interactive local branch picker: switch, rename, delete |
+| Command | Alias | Purpose |
+|---|---|---|
+| `kg branch` | `kg b` | Interactive local branch picker: switch, rename, delete |
+| `kg log` | `kg l` | Interactive commit graph: visualise topology, copy hash |
 
-More commands are planned (`kg log`, `kg add`, `kg cherry-pick`, `kg tag`).
+More commands are planned (`kg add`, `kg cherry-pick`, `kg tag`).
 
-### `kg branch`
-
-Opens an inline interactive branch picker. Each branch shows its short commit hash and subject line.
-
-```sh
-kg branch          # default: 3 branches per page
-kg branch -p 5     # show 5 branches per page
-kg b               # shorthand alias
-kg b -p 10
-```
-
-Controls:
-
-| Key | Action |
-|---|---|
-| `↑` / `↓` or `j` / `k` | Move selection |
-| Type or `/` | Filter branches |
-| `enter` | Switch to selected branch |
-| `r` | Rename selected branch |
-| `d` | Delete selected branch (with confirmation) |
-| `q` / `esc` | Quit without changes |
+See [docs/branch.md](docs/branch.md) and [docs/log.md](docs/log.md) for full keybindings and examples.
 
 ## Development
 

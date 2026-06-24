@@ -26,6 +26,7 @@ func NewRootCmd() *cobra.Command {
 	root.SetVersionTemplate("{{.Version}}\n")
 
 	root.AddCommand(newBranchCmd())
+	root.AddCommand(newLogCmd())
 
 	return root
 }
