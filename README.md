@@ -9,6 +9,8 @@
 pickers and safer defaults. It shells out to the installed `git` binary, so it
 works with your existing Git configuration.
 
+![Demo](img/branch_and_log_demo.gif)
+
 ## Installation
 
 ```sh
