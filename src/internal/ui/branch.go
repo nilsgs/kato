@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"kato/internal/git"
+
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"kato/internal/git"
 )
 
 // viewState tracks which UI mode is currently active.
@@ -52,11 +53,11 @@ func (b branchItem) Description() string { return "" }
 func (b branchItem) FilterValue() string { return b.branch.Name }
 
 var (
-	helpStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
-	subtitleStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("250"))
-	errorStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
-	hashStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("3"))
-	subjectStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("246"))
+	helpStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
+	subtitleStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("250"))
+	errorStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
+	hashStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("3"))
+	subjectStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("246"))
 	branchNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("6"))
 )
 
@@ -71,29 +72,31 @@ type BranchModel struct {
 	quitting    bool
 }
 
-const (
-	listWidth      = 100
-	listMaxVisible = 8
-)
+const listWidth = 100
 
 // NewBranchModel constructs a BranchModel from a slice of local branches.
-func NewBranchModel(branches []git.Branch) BranchModel {
+// pageSize controls how many branches are visible at once.
+func NewBranchModel(branches []git.Branch, pageSize int) BranchModel {
 	items := make([]list.Item, len(branches))
 	for i, b := range branches {
 		items[i] = branchItem{b}
 	}
 
 	visible := len(branches)
-	if visible > listMaxVisible {
-		visible = listMaxVisible
+	if visible > pageSize {
+		visible = pageSize
 	}
 
 	delegate := list.NewDefaultDelegate()
 	delegate.ShowDescription = false
+	delegate.SetHeight(1)
+	delegate.SetSpacing(0)
 
-	l := list.New(items, delegate, listWidth, visible)
+	l := list.New(items, delegate, listWidth, visible+2)
 	l.SetShowTitle(false)
+	l.SetShowFilter(false)
 	l.SetShowStatusBar(false)
+	l.SetShowPagination(true)
 	l.SetShowHelp(false)
 	l.SetFilteringEnabled(true)
 
@@ -264,10 +267,13 @@ func (m BranchModel) View() string {
 
 	switch m.state {
 	case viewBrowse:
-		if m.statusMsg != "" {
-			return m.list.View() + "\n" + m.statusMsg
+		view := m.list.View()
+		if m.list.FilterState() == list.Filtering {
+			view = helpStyle.Render("filter: "+m.list.FilterInput.Value()+"_") + "\n" + view
+		} else if m.statusMsg != "" {
+			view = view + "\n" + m.statusMsg
 		}
-		return m.list.View()
+		return view
 
 	case viewRename:
 		item, _ := m.list.SelectedItem().(branchItem)

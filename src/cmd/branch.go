@@ -10,15 +10,23 @@ import (
 )
 
 func newBranchCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "branch",
-		Short: "Interactively manage local branches",
-		Long:  "Open an interactive branch picker to switch, rename, or delete local branches.",
-		RunE:  runBranch,
+	cmd := &cobra.Command{
+		Use:     "branch",
+		Aliases: []string{"b"},
+		Short:   "Interactively manage local branches",
+		Long:    "Open an interactive branch picker to switch, rename, or delete local branches.",
+		RunE:    runBranch,
 	}
+	cmd.Flags().IntP("page", "p", 3, "number of branches per page")
+	return cmd
 }
 
 func runBranch(cmd *cobra.Command, _ []string) error {
+	pageSize, _ := cmd.Flags().GetInt("page")
+	if pageSize < 1 {
+		return fmt.Errorf("page size must be at least 1")
+	}
+
 	branches, err := git.ListBranches()
 	if err != nil {
 		return fmt.Errorf("listing branches: %w", err)
@@ -28,7 +36,7 @@ func runBranch(cmd *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	m := ui.NewBranchModel(branches)
+	m := ui.NewBranchModel(branches, pageSize)
 	p := tea.NewProgram(m)
 	final, err := p.Run()
 	if err != nil {

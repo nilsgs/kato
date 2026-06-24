@@ -32,10 +32,13 @@ More commands are planned (`kg log`, `kg add`, `kg cherry-pick`, `kg tag`).
 
 ### `kg branch`
 
-Opens an interactive branch picker:
+Opens an inline interactive branch picker. Each branch shows its short commit hash and subject line.
 
 ```sh
-kg branch
+kg branch          # default: 3 branches per page
+kg branch -p 5     # show 5 branches per page
+kg b               # shorthand alias
+kg b -p 10
 ```
 
 Controls:

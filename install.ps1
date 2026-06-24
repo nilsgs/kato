@@ -9,19 +9,18 @@ if (-not $Commit) { $Commit = 'unknown' }
 $Ldflags = "-s -w -X kato/cmd.version=$Version -X kato/cmd.commit=$Commit"
 
 Write-Host "Building kg v${Version}+${Commit}..."
-Push-Location (Join-Path $RepoDir 'src')
-try {
-    & go build -ldflags $Ldflags -o (Join-Path $RepoDir 'kg.exe') .
-    if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
-} finally {
-    Pop-Location
-}
-
 Write-Host "Installing to $InstallDir..."
 if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 }
-Move-Item -Force (Join-Path $RepoDir 'kg.exe') (Join-Path $InstallDir 'kg.exe')
+$Dest = Join-Path $InstallDir 'kg.exe'
+Push-Location (Join-Path $RepoDir 'src')
+try {
+    & go build -ldflags $Ldflags -o $Dest .
+    if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
+} finally {
+    Pop-Location
+}
 
 $UserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 if ($UserPath -split ';' | Where-Object { $_ -eq $InstallDir }) {
