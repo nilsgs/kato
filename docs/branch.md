@@ -3,10 +3,10 @@
 `kato git branch` (alias: `kato git b`) opens an inline interactive picker showing local branches with their short commit hash and subject line.
 
 ```sh
-kato git branch          # default: 3 branches per page
+kato git branch          # default: 10 branches per page
 kato git branch -p 5     # show 5 branches per page
 kato git b               # shorthand alias
-kato git b -p 10
+kato git b -p 20
 ```
 
 ## Keybindings
@@ -48,5 +48,5 @@ kato git branch
 ### Show more branches at once
 
 ```sh
-kato git branch -p 10
+kato git branch -p 20
 ```

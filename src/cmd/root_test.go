@@ -54,6 +54,22 @@ func TestGitCommandAliases(t *testing.T) {
 	}
 }
 
+func TestBranchDefaultPageSize(t *testing.T) {
+	root := cmd.NewRootCmd()
+	branch, _, err := root.Find([]string{"git", "branch"})
+	if err != nil {
+		t.Fatalf("find branch command: %v", err)
+	}
+
+	page := branch.Flags().Lookup("page")
+	if page == nil {
+		t.Fatal("expected branch command to define the page flag")
+	}
+	if page.DefValue != "10" {
+		t.Errorf("default page size = %q; want %q", page.DefValue, "10")
+	}
+}
+
 func TestLegacyRootCommandsAreRejected(t *testing.T) {
 	for _, legacy := range []string{"branch", "log"} {
 		root := cmd.NewRootCmd()

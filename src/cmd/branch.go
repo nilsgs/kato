@@ -17,7 +17,7 @@ func newBranchCmd() *cobra.Command {
 		Long:    "Open an interactive branch picker to switch, rename, or delete local branches.",
 		RunE:    runBranch,
 	}
-	cmd.Flags().IntP("page", "p", 3, "number of branches per page")
+	cmd.Flags().IntP("page", "p", 10, "number of branches per page")
 	return cmd
 }
 
