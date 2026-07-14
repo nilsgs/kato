@@ -11,18 +11,19 @@ user acts.
 ## Naming
 
 - Tool/family name: `Kato`
-- Git command: `kg`
+- CLI command: `kato`
+- Git command group: `kato git`
 - Git-specific product name when needed: `Kato Git`
 
-The command name `kg` is short for `kato git`. This keeps room for Kato to grow
-into other domains later without making the overall product name Git-specific.
+Git-specific commands live under `kato git`. This keeps room for Kato to grow
+into other domains without making the overall product Git-specific.
 
 ## Product Principles
 
 - Kato is a helper, not a Git replacement.
 - Kato should be unobtrusive and terminal-native.
 - Kato should require explicit subcommands.
-- Running `kg` by itself should show help and available commands.
+- Running `kato` by itself should show help and available command groups.
 - Kato should support explicit behavior only, not arbitrary pass-through to Git.
 - Kato should shell out to the installed `git` binary instead of implementing Git
   behavior through a library.
@@ -38,7 +39,7 @@ into other domains later without making the overall product name Git-specific.
   - Bubble Tea for interactive flows
   - Bubbles for reusable UI components
   - Lip Gloss for styling
-- Distribution target: single native `kg` binary
+- Distribution target: single native `kato` binary
 
 This matches the existing Go CLI tools in this workspace, which use Cobra, while
 Charm is the preferred stack for rich terminal UX.
@@ -48,15 +49,15 @@ Charm is the preferred stack for rich terminal UX.
 The first implementation focus is:
 
 ```sh
-kg branch
+kato git branch
 ```
 
 Other commands should be mentioned and reserved in the design, but branch should
 be implemented and refined first.
 
-## `kg branch`
+## `kato git branch`
 
-`kg branch` helps users switch between local branches without remembering or
+`kato git branch` helps users switch between local branches without remembering or
 typing exact branch names.
 
 ### Scope
@@ -77,7 +78,7 @@ Initial scope:
 When the user runs:
 
 ```sh
-kg branch
+kato git branch
 ```
 
 Kato opens an interactive local branch picker.
@@ -131,10 +132,10 @@ clear which branch is being renamed.
 
 ## Later Commands
 
-These commands are good candidates after `kg branch`, but they should not drive
+These commands are good candidates after `kato git branch`, but they should not drive
 the first implementation.
 
-### `kg log`
+### `kato git log`
 
 Purpose: provide a rich terminal history browser good enough that the user does
 not need to open a GUI just to understand recent history.
@@ -147,7 +148,7 @@ Current intended shape:
 - Do not perform Git actions by default.
 - Possible later actions: expand details, search/filter, copy hash.
 
-### `kg add`
+### `kato git add`
 
 Purpose: provide a file-level staging picker.
 
@@ -160,7 +161,7 @@ Current intended shape:
 - Stage selected files with `git add -- <files>`.
 - Hunk-level staging is out of scope for the initial version.
 
-### `kg cherry-pick`
+### `kato git cherry-pick`
 
 Purpose: choose one commit from a searchable commit list and cherry-pick it.
 
@@ -173,7 +174,7 @@ Current intended shape:
 - If conflicts occur, leave the repository in Git's normal conflict state and
   explain what happened.
 
-### `kg tag`
+### `kato git tag`
 
 Purpose: browse and manage tags.
 
@@ -186,7 +187,7 @@ Current intended shape:
 - Show useful tag context such as name, target commit, date, and annotation when
   available.
 
-### `kg commit`
+### `kato git commit`
 
 Deferred.
 
@@ -194,7 +195,7 @@ Longer-term direction: integrate with an LLM or agent harness, such as Codex, to
 write good comprehensive commit messages from staged changes. The user should be
 able to review and edit the generated message before committing.
 
-### `kg rebase`
+### `kato git rebase`
 
 Deferred.
 
@@ -207,7 +208,7 @@ interaction model is proven.
 - Exact visual design for the branch picker.
 - Whether filtering should start immediately on typing or require `/`.
 - Whether branch rows should show last commit summary/date.
-- Whether `kg branch` should include a create-new-branch action.
+- Whether `kato git branch` should include a create-new-branch action.
 - Whether force delete should exist behind an explicit keybinding or separate
   confirmation flow.
-- How clipboard support should be handled cross-platform for later `kg log`.
+- How clipboard support should be handled cross-platform for later `kato git log`.

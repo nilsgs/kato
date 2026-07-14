@@ -28,10 +28,10 @@ to your PATH.
 
 | Command | Alias | Purpose |
 |---|---|---|
-| `kg branch` | `kg b` | Interactive local branch picker: switch, rename, delete |
-| `kg log` | `kg l` | Interactive commit graph: visualise topology, copy hash |
+| `kato git branch` | `kato git b` | Interactive local branch picker: switch, rename, delete |
+| `kato git log` | `kato git l` | Interactive commit graph: visualise topology, copy hash |
 
-More commands are planned (`kg add`, `kg cherry-pick`, `kg tag`).
+More Git commands are planned (`kato git add`, `kato git cherry-pick`, `kato git tag`), and the top-level namespace is available for future non-Git functionality.
 
 See [docs/branch.md](docs/branch.md) and [docs/log.md](docs/log.md) for full keybindings and examples.
 
@@ -49,6 +49,6 @@ task ci      # Run test + build + smoke
 Builds stamp `VERSION` plus the short Git commit hash:
 
 ```sh
-kg --version
+kato --version
 # 0.1.0+abc1234
 ```

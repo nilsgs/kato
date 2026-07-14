@@ -6,14 +6,15 @@ REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 VERSION=$(cat "$REPO_DIR/VERSION" | tr -d '\r\n')
 COMMIT=$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-echo "Building kg v${VERSION}+${COMMIT}..."
+echo "Building kato v${VERSION}+${COMMIT}..."
 cd "$REPO_DIR/src"
-go build -ldflags "-s -w -X kato/cmd.version=${VERSION} -X kato/cmd.commit=${COMMIT}" -o "$REPO_DIR/kg" .
+go build -ldflags "-s -w -X kato/cmd.version=${VERSION} -X kato/cmd.commit=${COMMIT}" -o "$REPO_DIR/kato" .
 
 echo "Installing to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR"
-mv "$REPO_DIR/kg" "$INSTALL_DIR/kg"
-chmod +x "$INSTALL_DIR/kg"
+rm -f "$INSTALL_DIR/kg"
+mv "$REPO_DIR/kato" "$INSTALL_DIR/kato"
+chmod +x "$INSTALL_DIR/kato"
 
 add_to_path() {
     local profile="$1"
@@ -21,7 +22,7 @@ add_to_path() {
         return
     fi
     echo '' >> "$profile"
-    echo '# kato (kg) CLI' >> "$profile"
+    echo '# Kato CLI' >> "$profile"
     echo 'export PATH="$HOME/.kato/bin:$PATH"' >> "$profile"
     echo "Added to $profile"
 }
@@ -54,4 +55,4 @@ else
     echo "Restart your shell or run: export PATH=\"$INSTALL_DIR:\$PATH\""
 fi
 
-echo "Done. Run 'kg --help' to get started."
+echo "Done. Run 'kato --help' to get started."

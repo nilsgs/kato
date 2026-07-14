@@ -12,21 +12,20 @@ var (
 	commit  = "none"
 )
 
-// NewRootCmd constructs the root kg command. Callers may use this directly in
+// NewRootCmd constructs the root kato command. Callers may use this directly in
 // tests to get a fresh, isolated command tree.
 func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
-		Use:           "kg",
-		Short:         "Kato Git – small, unobtrusive Git superpowers",
-		Long:          "kg enhances common Git workflows with interactive pickers and safer defaults.\nIt shells out to the installed git binary and respects your existing configuration.",
+		Use:           "kato",
+		Short:         "Small, unobtrusive superpowers for your terminal",
+		Long:          "Kato enhances command-line workflows with interactive pickers and safer defaults.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 	root.Version = version + "+" + commit
 	root.SetVersionTemplate("{{.Version}}\n")
 
-	root.AddCommand(newBranchCmd())
-	root.AddCommand(newLogCmd())
+	root.AddCommand(newGitCmd())
 
 	return root
 }

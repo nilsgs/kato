@@ -1,16 +1,17 @@
-# kg Agent Notes
+# Kato Agent Notes
 
 ## Layout
 
 - `src/main.go`: CLI entry point. Calls `cmd.Execute()`.
-- `src/cmd/`: Cobra root command, subcommands, flags, and output formatting.
+- `src/cmd/`: Cobra root command, command groups, subcommands, flags, and output formatting.
 - `src/cmd/root.go`: `NewRootCmd()`, `Execute()`, version/commit vars stamped at build time.
-- `src/cmd/branch.go`: `kg branch` – lists branches, launches the Bubble Tea picker.
+- `src/cmd/git.go`: `kato git` command group for Git-specific workflows.
+- `src/cmd/branch.go`: `kato git branch` – lists branches, launches the Bubble Tea picker.
 - `src/internal/git/`: Low-level git shell-out helpers (ListBranches, Switch, Rename, Delete).
 - `src/internal/ui/`: Bubble Tea models for interactive commands.
 - `src/internal/ui/branch.go`: Interactive branch picker model (browse, rename, delete-confirm states).
-- `install.ps1`: Builds and installs `kg` on Windows; adds `~/.kato/bin` to user PATH.
-- `install.sh`: Builds and installs `kg` on Unix; adds `~/.kato/bin` to shell profile.
+- `install.ps1`: Builds and installs `kato` on Windows; adds `~/.kato/bin` to user PATH.
+- `install.sh`: Builds and installs `kato` on Unix; adds `~/.kato/bin` to shell profile.
 - `specs/`: Smoko smoke specs.
 - `.smokorc`: Smoko image, timeout, and Docker build command.
 
@@ -45,7 +46,7 @@ Task or docs.
 
 ## Constraints
 
-- `kg` shells out to the installed `git` binary. It does not implement Git
+- `kato git` shells out to the installed `git` binary. It does not implement Git
   behavior through a library.
 - Do not add pass-through `git` command support. Each subcommand must be
   explicit and intentional.
@@ -57,7 +58,7 @@ Task or docs.
 ## Documentation
 
 - Keep `README.md` as the concise user and developer front door.
-- See `docs/usage.md` for extended usage details.
+- See `docs/branch.md` and `docs/log.md` for extended usage details.
 
 ## Versioning
 

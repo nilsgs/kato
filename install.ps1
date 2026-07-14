@@ -8,18 +8,23 @@ $Commit = try { (git -C $RepoDir rev-parse --short HEAD 2>$null) } catch { 'unkn
 if (-not $Commit) { $Commit = 'unknown' }
 $Ldflags = "-s -w -X kato/cmd.version=$Version -X kato/cmd.commit=$Commit"
 
-Write-Host "Building kg v${Version}+${Commit}..."
+Write-Host "Building kato v${Version}+${Commit}..."
 Write-Host "Installing to $InstallDir..."
 if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 }
-$Dest = Join-Path $InstallDir 'kg.exe'
+$Dest = Join-Path $InstallDir 'kato.exe'
+$LegacyDest = Join-Path $InstallDir 'kg.exe'
 Push-Location (Join-Path $RepoDir 'src')
 try {
     & go build -ldflags $Ldflags -o $Dest .
     if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
 } finally {
     Pop-Location
+}
+if (Test-Path $LegacyDest) {
+    Remove-Item -LiteralPath $LegacyDest -Force
+    Write-Host "Removed obsolete $LegacyDest"
 }
 
 $UserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -32,4 +37,4 @@ if ($UserPath -split ';' | Where-Object { $_ -eq $InstallDir }) {
     Write-Host "Added $InstallDir to user PATH"
 }
 
-Write-Host 'Done. Restart your terminal, then run: kg --help'
+Write-Host 'Done. Restart your terminal, then run: kato --help'

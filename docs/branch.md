@@ -1,12 +1,12 @@
-# kg branch
+# kato git branch
 
-`kg branch` (alias: `kg b`) opens an inline interactive picker showing local branches with their short commit hash and subject line.
+`kato git branch` (alias: `kato git b`) opens an inline interactive picker showing local branches with their short commit hash and subject line.
 
 ```sh
-kg branch          # default: 3 branches per page
-kg branch -p 5     # show 5 branches per page
-kg b               # shorthand alias
-kg b -p 10
+kato git branch          # default: 3 branches per page
+kato git branch -p 5     # show 5 branches per page
+kato git b               # shorthand alias
+kato git b -p 10
 ```
 
 ## Keybindings
@@ -25,14 +25,14 @@ kg b -p 10
 ### Switch to main
 
 ```sh
-kg branch
+kato git branch
 # → navigate to main, press enter
 ```
 
 ### Rename current branch
 
 ```sh
-kg branch
+kato git branch
 # → press r
 # → type new name, press enter
 ```
@@ -40,7 +40,7 @@ kg branch
 ### Delete a merged branch
 
 ```sh
-kg branch
+kato git branch
 # → navigate to the branch, press d
 # → press y to confirm
 ```
@@ -48,5 +48,5 @@ kg branch
 ### Show more branches at once
 
 ```sh
-kg branch -p 10
+kato git branch -p 10
 ```

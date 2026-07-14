@@ -11,15 +11,12 @@ tasks:
     dir: src
     cmds:
       - cmd: |
-          $v = (Get-Content ..\VERSION -Raw).Trim()
-          $c = try { git -C .. rev-parse --short HEAD 2>$null } catch { 'unknown' }
-          if (-not $c) { $c = 'unknown' }
-          go build -ldflags "-s -w -X kato/cmd.version=$v -X kato/cmd.commit=$c" -o ..\kg.exe .
+          powershell -NoProfile -ExecutionPolicy Bypass -Command "\$v = (Get-Content ..\VERSION -Raw).Trim(); \$c = try { git -C .. rev-parse --short HEAD 2>\$null } catch { 'unknown' }; if (-not \$c) { \$c = 'unknown' }; \$f = \"-s -w -X kato/cmd.version=\$v -X kato/cmd.commit=\$c\"; go build -ldflags \$f -o ..\kato.exe ."
         platforms: [windows]
       - cmd: |
           v="$(tr -d '\r\n' < ../VERSION)"
           c="$(git -C .. rev-parse --short HEAD 2>/dev/null || printf unknown)"
-          go build -ldflags "-s -w -X kato/cmd.version=${v} -X kato/cmd.commit=${c}" -o ../kg .
+          go build -ldflags "-s -w -X kato/cmd.version=${v} -X kato/cmd.commit=${c}" -o ../kato .
         platforms: [linux, darwin]
 
   test:
@@ -51,12 +48,12 @@ tasks:
           $f = "-s -w -X kato/cmd.version=$v -X kato/cmd.commit=$c"
           New-Item -ItemType Directory -Force -Path ..\dist | Out-Null
           foreach ($t in @(
-            'linux/amd64/kg-linux-amd64',
-            'linux/arm64/kg-linux-arm64',
-            'darwin/amd64/kg-darwin-amd64',
-            'darwin/arm64/kg-darwin-arm64',
-            'windows/amd64/kg-windows-amd64.exe',
-            'windows/arm64/kg-windows-arm64.exe'
+            'linux/amd64/kato-linux-amd64',
+            'linux/arm64/kato-linux-arm64',
+            'darwin/amd64/kato-darwin-amd64',
+            'darwin/arm64/kato-darwin-arm64',
+            'windows/amd64/kato-windows-amd64.exe',
+            'windows/arm64/kato-windows-arm64.exe'
           )) {
             $parts = $t -split '/'; $env:GOOS = $parts[0]; $env:GOARCH = $parts[1]
             go build -ldflags $f -o "..\dist\$($parts[2])" .
@@ -68,9 +65,9 @@ tasks:
           c="$(git -C .. rev-parse --short HEAD 2>/dev/null || printf unknown)"
           f="-s -w -X kato/cmd.version=${v} -X kato/cmd.commit=${c}"
           mkdir -p ../dist
-          for spec in "linux amd64 kg-linux-amd64" "linux arm64 kg-linux-arm64" \
-                      "darwin amd64 kg-darwin-amd64" "darwin arm64 kg-darwin-arm64" \
-                      "windows amd64 kg-windows-amd64.exe" "windows arm64 kg-windows-arm64.exe"; do
+          for spec in "linux amd64 kato-linux-amd64" "linux arm64 kato-linux-arm64" \
+                      "darwin amd64 kato-darwin-amd64" "darwin arm64 kato-darwin-arm64" \
+                      "windows amd64 kato-windows-amd64.exe" "windows arm64 kato-windows-arm64.exe"; do
             set -- $spec; GOOS=$1 GOARCH=$2 go build -ldflags "$f" -o "../dist/$3" .
           done
         platforms: [linux, darwin]
@@ -86,7 +83,7 @@ tasks:
   clean:
     desc: Remove build artifacts
     cmds:
-      - cmd: powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item -ErrorAction SilentlyContinue kg.exe; if (Test-Path dist) { Remove-Item -Recurse -Force dist }"
+      - cmd: powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item -ErrorAction SilentlyContinue kato.exe,kg.exe; if (Test-Path dist) { Remove-Item -Recurse -Force dist }"
         platforms: [windows]
-      - cmd: rm -f kg && rm -rf dist
+      - cmd: rm -f kato kg && rm -rf dist
         platforms: [linux, darwin]

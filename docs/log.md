@@ -1,13 +1,13 @@
-# kg log
+# kato git log
 
-`kg log` (alias: `kg l`) opens an interactive commit graph browser for the current branch, showing topology with branch relationships.
+`kato git log` (alias: `kato git l`) opens an interactive commit graph browser for the current branch, showing topology with branch relationships.
 
 ```sh
-kg log              # current branch, last 100 commits, 10 lines per page
-kg log --all        # include all branches
-kg log -n 200       # load more history
-kg log -p 20        # show 20 lines per page
-kg l                # shorthand alias
+kato git log              # current branch, last 100 commits, 10 lines per page
+kato git log --all        # include all branches
+kato git log -n 200       # load more history
+kato git log -p 20        # show 20 lines per page
+kato git l                # shorthand alias
 ```
 
 ## Columns
@@ -37,19 +37,19 @@ Connector lines (`|`, `/`, `\`) show branch topology between commits. Branch and
 ### Browse current branch history
 
 ```sh
-kg log
+kato git log
 ```
 
 ### Include all branches
 
 ```sh
-kg log --all
+kato git log --all
 ```
 
 ### Copy a commit hash
 
 ```sh
-kg log
+kato git log
 # → navigate to the commit, press enter or c
 # → "Copied abc1234 to clipboard" is printed
 ```

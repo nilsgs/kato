@@ -1,29 +1,34 @@
-Feature: kg basic
+Feature: kato basic
 
-  Scenario: version flag prints version
-    When I run "kg --version"
+  Scenario: root help lists the Git command group
+    When I run "kato --help"
     Then exit code is 0
-    And output contains "0.1.0"
+    And output contains "git"
+    And output does not contain "  branch"
+    And output does not contain "  log"
 
-  Scenario: help flag lists branch command
-    When I run "kg --help"
+  Scenario: Git help lists Git workflow commands
+    When I run "kato git --help"
     Then exit code is 0
     And output contains "branch"
+    And output contains "log"
 
   Scenario: branch help describes the command
-    When I run "kg branch --help"
+    When I run "kato git branch --help"
     Then exit code is 0
     And output contains "branch"
 
   Scenario: branch in non-git directory fails
-    When I run "kg branch"
+    When I run "kato git branch"
     Then exit code is not 0
+    And stderr contains "listing branches"
 
   Scenario: log help describes the command
-    When I run "kg log --help"
+    When I run "kato git log --help"
     Then exit code is 0
     And output contains "log"
 
   Scenario: log in non-git directory fails
-    When I run "kg log"
+    When I run "kato git log"
     Then exit code is not 0
+    And stderr contains "building log"
