@@ -38,3 +38,32 @@ if ($UserPath -split ';' | Where-Object { $_ -eq $InstallDir }) {
 }
 
 Write-Host 'Done. Restart your terminal, then run: kato --help'
+
+# Install shell integration into PowerShell profile (idempotent).
+$ProfileDir = Split-Path -Parent $PROFILE
+if (-not (Test-Path $ProfileDir)) {
+    New-Item -ItemType Directory -Path $ProfileDir -Force | Out-Null
+}
+if (-not (Test-Path $PROFILE)) {
+    New-Item -ItemType File -Path $PROFILE -Force | Out-Null
+}
+$ProfileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
+if ($ProfileContent -notmatch '# kato shell integration') {
+    $KatoExe = Join-Path $InstallDir 'kato.exe'
+    $Integration = @"
+
+# kato shell integration — enables kato nav to change directory
+function kato {
+  if (`$args[0] -eq 'nav') {
+    `$dir = & "$KatoExe" nav
+    if (`$dir) { Set-Location `$dir }
+  } else {
+    & "$KatoExe" @args
+  }
+}
+"@
+    Add-Content -Path $PROFILE -Value $Integration
+    Write-Host "Added kato shell integration to $PROFILE"
+} else {
+    Write-Host "kato shell integration already present in $PROFILE"
+}
