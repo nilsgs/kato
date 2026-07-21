@@ -27,6 +27,7 @@ func NewRootCmd() *cobra.Command {
 
 	root.AddCommand(newGitCmd())
 	root.AddCommand(newNavCmd())
+	root.AddCommand(newAliasCmd())
 
 	return root
 }

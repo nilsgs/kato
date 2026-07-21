@@ -39,7 +39,18 @@ if ($UserPath -split ';' | Where-Object { $_ -eq $InstallDir }) {
 
 Write-Host 'Done. Restart your terminal, then run: kato --help'
 
-# Install shell integration into PowerShell profile (idempotent).
+$KatoDir = Join-Path $env:USERPROFILE '.kato'
+$InitPs1 = Join-Path $KatoDir 'init.ps1'
+
+# Copy the kato-owned PowerShell init script from the repo to ~/.kato/.
+if (-not (Test-Path $KatoDir)) {
+    New-Item -ItemType Directory -Path $KatoDir -Force | Out-Null
+}
+$ScriptSrc = Join-Path $RepoDir 'src\internal\shell\scripts\init.ps1'
+Copy-Item -Path $ScriptSrc -Destination $InitPs1 -Force
+Write-Host "Wrote $InitPs1"
+
+# Inject (or replace) the kato block in the PowerShell profile using BEGIN/END markers.
 $ProfileDir = Split-Path -Parent $PROFILE
 if (-not (Test-Path $ProfileDir)) {
     New-Item -ItemType Directory -Path $ProfileDir -Force | Out-Null
@@ -47,23 +58,13 @@ if (-not (Test-Path $ProfileDir)) {
 if (-not (Test-Path $PROFILE)) {
     New-Item -ItemType File -Path $PROFILE -Force | Out-Null
 }
+$Block = "# BEGIN kato`n. `"$InitPs1`"`n# END kato"
 $ProfileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
-if ($ProfileContent -notmatch '# kato shell integration') {
-    $KatoExe = Join-Path $InstallDir 'kato.exe'
-    $Integration = @"
-
-# kato shell integration — enables kato nav to change directory
-function kato {
-  if (`$args[0] -eq 'nav') {
-    `$dir = & "$KatoExe" nav
-    if (`$dir) { Set-Location `$dir }
-  } else {
-    & "$KatoExe" @args
-  }
-}
-"@
-    Add-Content -Path $PROFILE -Value $Integration
-    Write-Host "Added kato shell integration to $PROFILE"
+if ($ProfileContent -match '# BEGIN kato') {
+    $ProfileContent = $ProfileContent -replace '(?s)# BEGIN kato.*?# END kato', $Block
+    Set-Content -Path $PROFILE -Value $ProfileContent -Encoding UTF8 -NoNewline
+    Write-Host "Updated kato block in $PROFILE"
 } else {
-    Write-Host "kato shell integration already present in $PROFILE"
+    Add-Content -Path $PROFILE -Value "`n$Block" -Encoding UTF8
+    Write-Host "Added kato block to $PROFILE"
 }

@@ -27,25 +27,47 @@ add_to_path() {
     echo "Added to $profile"
 }
 
-add_shell_integration() {
-    local profile="$1"
-    if [ -f "$profile" ] && grep -q '# kato shell integration' "$profile"; then
-        return
-    fi
-    cat >> "$profile" << 'EOF'
+KATO_DIR="$HOME/.kato"
+INIT_SH="$KATO_DIR/init.sh"
+INIT_FISH="$KATO_DIR/init.fish"
 
-# kato shell integration — enables kato nav to change directory
-kato() {
-  if [ "$1" = "nav" ]; then
-    local dir
-    dir=$(command kato "$@")
-    [ -n "$dir" ] && cd "$dir"
-  else
-    command kato "$@"
-  fi
+# Copy the kato-owned init scripts from the repo to ~/.kato/.
+write_init_sh() {
+    mkdir -p "$KATO_DIR"
+    cp "$REPO_DIR/src/internal/shell/scripts/init.sh" "$INIT_SH"
+    chmod 640 "$INIT_SH"
+    echo "Wrote $INIT_SH"
 }
-EOF
-    echo "Added kato shell integration to $profile"
+
+write_init_fish() {
+    mkdir -p "$KATO_DIR"
+    cp "$REPO_DIR/src/internal/shell/scripts/init.fish" "$INIT_FISH"
+    chmod 640 "$INIT_FISH"
+    echo "Wrote $INIT_FISH"
+}
+
+# Inject (or replace) the kato block in a profile using BEGIN/END markers.
+# Safe to run on every install — replaces the block in-place if present.
+inject_kato_block() {
+    local profile="$1"
+    local init_script="$2"
+    local block
+    block="$(printf '# BEGIN kato\nsource "%s"\n# END kato' "$init_script")"
+
+    mkdir -p "$(dirname "$profile")"
+    if [ -f "$profile" ] && grep -q '# BEGIN kato' "$profile"; then
+        python3 - "$profile" "$block" << 'PY'
+import sys, re
+path, block = sys.argv[1], sys.argv[2]
+text = open(path).read()
+text = re.sub(r'# BEGIN kato\n.*?# END kato', block, text, flags=re.DOTALL)
+open(path, 'w').write(text)
+PY
+        echo "Updated kato block in $profile"
+    else
+        printf '\n%s\n' "$block" >> "$profile"
+        echo "Added kato block to $profile"
+    fi
 }
 
 shell_name="$(basename "${SHELL:-/bin/bash}")"
@@ -77,33 +99,24 @@ else
     echo "Restart your shell or run: export PATH=\"$INSTALL_DIR:\$PATH\""
 fi
 
-# Install shell integration (idempotent — skipped if already present).
+# Write init scripts and wire them into shell profiles.
 case "$shell_name" in
-    zsh)  add_shell_integration "$HOME/.zshrc" ;;
+    zsh)
+        write_init_sh
+        inject_kato_block "$HOME/.zshrc" "$INIT_SH"
+        ;;
     bash)
+        write_init_sh
         if [ -f "$HOME/.bash_profile" ]; then
-            add_shell_integration "$HOME/.bash_profile"
+            inject_kato_block "$HOME/.bash_profile" "$INIT_SH"
         else
-            add_shell_integration "$HOME/.bashrc"
+            inject_kato_block "$HOME/.bashrc" "$INIT_SH"
         fi
         ;;
     fish)
-        fish_fn="$HOME/.config/fish/functions/kato.fish"
-        if [ ! -f "$fish_fn" ] || ! grep -q '# kato shell integration' "$fish_fn"; then
-            mkdir -p "$(dirname "$fish_fn")"
-            cat > "$fish_fn" << 'EOF'
-# kato shell integration — enables kato nav to change directory
-function kato
-  if test "$argv[1]" = "nav"
-    set dir (command kato $argv)
-    and cd $dir
-  else
-    command kato $argv
-  end
-end
-EOF
-            echo "Added kato shell integration to $fish_fn"
-        fi
+        write_init_fish
+        fish_conf="$HOME/.config/fish/conf.d/kato.fish"
+        inject_kato_block "$fish_conf" "$INIT_FISH"
         ;;
 esac
 
