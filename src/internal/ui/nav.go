@@ -184,6 +184,9 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "enter":
 			m.chosen = m.currentDir
+			if item, ok := m.list.SelectedItem().(dirItem); ok {
+				m.chosen = filepath.Join(m.currentDir, item.name)
+			}
 			m.quitting = true
 			return m, tea.Quit
 
@@ -257,7 +260,7 @@ func (m NavModel) View() string {
 		body = m.list.View()
 	}
 
-	hint := navHintStyle.Render("↑/↓: move  →: open  ←: up  enter: select  h: toggle hidden  q: quit")
+	hint := navHintStyle.Render("↑/↓: move  →: open  ←: up  enter: select highlighted  h: toggle hidden  q: quit")
 
 	view := header + "\n" + body + "\n" + hint
 	if m.statusMsg != "" {
@@ -315,4 +318,3 @@ func listDirs(path string, showHidden bool) ([]string, error) {
 	}
 	return dirs, nil
 }
-

@@ -13,7 +13,7 @@ func newNavCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "nav",
 		Short: "Interactively navigate to a directory",
-		Long:  "Open an interactive directory picker. Use arrow keys to browse the filesystem tree, then press enter to select a directory. Prints the chosen path to stdout for shell integration (e.g. cd $(kato nav)).",
+		Long:  "Open an interactive directory picker. Use arrow keys to browse the filesystem tree, then press enter to select the highlighted directory. Prints the chosen path to stdout for shell integration (e.g. cd $(kato nav)).",
 		RunE:  runNav,
 	}
 }

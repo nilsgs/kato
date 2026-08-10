@@ -8,7 +8,7 @@ Interactively navigate the filesystem tree and jump to the selected directory.
 kato nav
 ```
 
-The command opens a full-screen picker starting at your current working directory. Navigate with arrow keys and press `enter` to confirm — your shell will change to the selected directory.
+The command opens a full-screen picker starting at your current working directory. Navigate with arrow keys and press `enter` to confirm — your shell will change to the highlighted directory.
 
 > **Note:** Shell integration is installed automatically by `install.sh` / `install.ps1`. After restarting your terminal, `kato nav` changes your directory directly.
 
@@ -21,7 +21,7 @@ The command opens a full-screen picker starting at your current working director
 | `↑` / `↓` | Move selection up / down |
 | `→` | Descend into the selected directory |
 | `←` | Go up to the parent directory |
-| `enter` | Confirm — jump to the currently-browsed directory |
+| `enter` | Confirm — jump to the highlighted directory; in an empty directory, select the currently-browsed directory |
 | `h` | Toggle visibility of hidden directories (dot-prefixed) |
 | `q` / `esc` | Cancel — stay in the current directory |
 
