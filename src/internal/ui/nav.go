@@ -27,69 +27,69 @@ type folderMeta struct {
 // Colors and icons are inspired by the Terminal-Icons PowerShell module.
 var wellKnownFolders = map[string]folderMeta{
 	// Version control
-	".git":              {"\ue702", "#FF4500"},
-	".github":           {"\uf09a", "#C0C0C0"},
-	"github":            {"\uf09a", "#C0C0C0"},
+	".git":    {"\ue702", "#FF4500"},
+	".github": {"\uf09a", "#C0C0C0"},
+	"github":  {"\uf09a", "#C0C0C0"},
 
 	// Development
-	"src":               {"\uf121", "#00FF7F"},
-	"source":            {"\uf121", "#00FF7F"},
-	"dev":               {"\uf121", "#00FF7F"},
-	"development":       {"\uf121", "#00FF7F"},
-	"projects":          {"\uf121", "#00FF7F"},
-	"bin":               {"\uf188", "#00FFF7"},
-	"output":            {"\uf019", "#00FF7F"},
-	"tests":             {"\uf0c3", "#87CEEB"},
-	"test":              {"\uf0c3", "#87CEEB"},
-	"specs":             {"\uf0c3", "#87CEEB"},
+	"src":         {"\uf121", "#00FF7F"},
+	"source":      {"\uf121", "#00FF7F"},
+	"dev":         {"\uf121", "#00FF7F"},
+	"development": {"\uf121", "#00FF7F"},
+	"projects":    {"\uf121", "#00FF7F"},
+	"bin":         {"\uf188", "#00FFF7"},
+	"output":      {"\uf019", "#00FF7F"},
+	"tests":       {"\uf0c3", "#87CEEB"},
+	"test":        {"\uf0c3", "#87CEEB"},
+	"specs":       {"\uf0c3", "#87CEEB"},
 
 	// Documentation
-	"docs":              {"\uf02d", "#00BFFF"},
-	"doc":               {"\uf02d", "#00BFFF"},
-	"documents":         {"\uf02d", "#00BFFF"},
+	"docs":      {"\uf02d", "#00BFFF"},
+	"doc":       {"\uf02d", "#00BFFF"},
+	"documents": {"\uf02d", "#00BFFF"},
 
 	// Media
-	"images":            {"\uf03e", "#9ACD32"},
-	"image":             {"\uf03e", "#9ACD32"},
-	"photos":            {"\uf03e", "#9ACD32"},
-	"pictures":          {"\uf03e", "#9ACD32"},
-	"videos":            {"\uf008", "#FFA500"},
-	"video":             {"\uf008", "#FFA500"},
-	"movies":            {"\uf008", "#FFA500"},
-	"media":             {"\uf144", "#D3D3D3"},
-	"music":             {"\uf001", "#DB7093"},
-	"songs":             {"\uf001", "#DB7093"},
-	"audio":             {"\uf001", "#DB7093"},
+	"images":   {"\uf03e", "#9ACD32"},
+	"image":    {"\uf03e", "#9ACD32"},
+	"photos":   {"\uf03e", "#9ACD32"},
+	"pictures": {"\uf03e", "#9ACD32"},
+	"videos":   {"\uf008", "#FFA500"},
+	"video":    {"\uf008", "#FFA500"},
+	"movies":   {"\uf008", "#FFA500"},
+	"media":    {"\uf144", "#D3D3D3"},
+	"music":    {"\uf001", "#DB7093"},
+	"songs":    {"\uf001", "#DB7093"},
+	"audio":    {"\uf001", "#DB7093"},
 
 	// Common user folders
-	"downloads":         {"\uf019", "#D3D3D3"},
-	"download":          {"\uf019", "#D3D3D3"},
-	"desktop":           {"\uf108", "#00FBFF"},
-	"favorites":         {"\uf005", "#F7D72C"},
-	"fonts":             {"\uf031", "#DC143C"},
-	"users":             {"\uf0c0", "#F4F4F4"},
-	"apps":              {"\uf009", "#FF143C"},
-	"applications":      {"\uf009", "#FF143C"},
+	"downloads":    {"\uf019", "#D3D3D3"},
+	"download":     {"\uf019", "#D3D3D3"},
+	"desktop":      {"\uf108", "#00FBFF"},
+	"favorites":    {"\uf005", "#F7D72C"},
+	"fonts":        {"\uf031", "#DC143C"},
+	"users":        {"\uf0c0", "#F4F4F4"},
+	"apps":         {"\uf009", "#FF143C"},
+	"applications": {"\uf009", "#FF143C"},
 
 	// Configuration
-	".config":           {"\uf013", "#87CEAF"},
-	".cache":            {"\uf013", "#87ECAF"},
-	".local":            {"\uf07b", "#D3D3D3"},
+	".config": {"\uf013", "#87CEAF"},
+	".cache":  {"\uf013", "#87ECAF"},
+	".local":  {"\uf07b", "#D3D3D3"},
 
 	// Editors / IDEs
-	".vscode":           {"\ue70c", "#87CEFA"},
-	".vscode-insiders":  {"\ue70c", "#24BFA5"},
-	".idea":             {"\uf0eb", "#FF6B6B"},
+	".vscode":          {"\ue70c", "#87CEFA"},
+	".vscode-insiders": {"\ue70c", "#24BFA5"},
+	".idea":            {"\uf0eb", "#FF6B6B"},
 
 	// Package managers / runtimes
-	"node_modules":      {"\ue71e", "#6B8E23"},
+	"node_modules": {"\ue71e", "#6B8E23"},
 
 	// Cloud / infrastructure
-	".docker":           {"\uf308", "#2391E6"},
-	".kube":             {"\uf1b2", "#326DE6"},
-	".terraform":        {"\uf1b2", "#948EEC"},
-	".aws":              {"\uf270", "#EC912D"},
-	".azure":            {"\uf17b", "#00BFFF"},
+	".docker":    {"\uf308", "#2391E6"},
+	".kube":      {"\uf1b2", "#326DE6"},
+	".terraform": {"\uf1b2", "#948EEC"},
+	".aws":       {"\uf270", "#EC912D"},
+	".azure":     {"\uf17b", "#00BFFF"},
 }
 
 const defaultFolderIcon = "\uf07b"
@@ -177,18 +177,40 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		if msg.String() == "alt+h" {
+			m.showHidden = !m.showHidden
+			dirs, err := listDirs(m.currentDir, m.showHidden)
+			if err != nil {
+				m.statusMsg = helpStyle.Render(err.Error())
+				return m, nil
+			}
+			m.list = newDirList(dirs)
+			m.statusMsg = ""
+			return m, nil
+		}
+
+		if m.list.FilterState() == list.Filtering {
+			switch msg.String() {
+			case "enter":
+				m.list.SetFilterState(list.FilterApplied)
+				return m.selectHighlighted()
+			case "up", "down":
+				m.list.SetFilterState(list.FilterApplied)
+			}
+			break
+		}
+
 		switch msg.String() {
-		case "q", "esc":
+		case "esc":
+			if m.list.FilterState() == list.FilterApplied {
+				m.list.ResetFilter()
+				return m, nil
+			}
 			m.quitting = true
 			return m, tea.Quit
 
 		case "enter":
-			m.chosen = m.currentDir
-			if item, ok := m.list.SelectedItem().(dirItem); ok {
-				m.chosen = filepath.Join(m.currentDir, item.name)
-			}
-			m.quitting = true
-			return m, tea.Quit
+			return m.selectHighlighted()
 
 		case "right":
 			item, ok := m.list.SelectedItem().(dirItem)
@@ -228,21 +250,25 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.statusMsg = ""
 			return m, nil
 
-		case "h":
-			m.showHidden = !m.showHidden
-			dirs, err := listDirs(m.currentDir, m.showHidden)
-			if err != nil {
-				m.statusMsg = helpStyle.Render(err.Error())
-				return m, nil
-			}
-			m.list = newDirList(dirs)
-			return m, nil
+		}
+
+		if msg.Type == tea.KeyRunes && !msg.Alt {
+			m.list.SetFilterState(list.Filtering)
 		}
 	}
 
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
+}
+
+func (m NavModel) selectHighlighted() (tea.Model, tea.Cmd) {
+	m.chosen = m.currentDir
+	if item, ok := m.list.SelectedItem().(dirItem); ok {
+		m.chosen = filepath.Join(m.currentDir, item.name)
+	}
+	m.quitting = true
+	return m, tea.Quit
 }
 
 // View implements tea.Model.
@@ -260,9 +286,13 @@ func (m NavModel) View() string {
 		body = m.list.View()
 	}
 
-	hint := navHintStyle.Render("↑/↓: move  →: open  ←: up  enter: select highlighted  h: toggle hidden  q: quit")
+	hint := navHintStyle.Render("type: filter  ↑/↓: move  →: open  ←: up  enter: select  alt+h: hidden  esc: clear/quit")
 
-	view := header + "\n" + body + "\n" + hint
+	view := header + "\n"
+	if m.list.FilterState() != list.Unfiltered {
+		view += navHintStyle.Render("filter: "+m.list.FilterInput.Value()+"_") + "\n"
+	}
+	view += body + "\n" + hint
 	if m.statusMsg != "" {
 		view += "\n" + m.statusMsg
 	}
@@ -295,7 +325,7 @@ func newDirList(dirs []string) list.Model {
 	l.SetShowStatusBar(false)
 	l.SetShowPagination(true)
 	l.SetShowHelp(false)
-	l.SetFilteringEnabled(false)
+	l.SetFilteringEnabled(true)
 
 	return l
 }

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -62,6 +63,135 @@ func TestNavEnterSelectsCurrentDirectoryWhenEmpty(t *testing.T) {
 	if got := m.Chosen(); got != want {
 		t.Errorf("chosen directory = %q; want %q", got, want)
 	}
+}
+
+func TestNavTypingStartsFilter(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "beta"))
+	m := newNavModelForTest(t, root)
+
+	m = updateNavForTest(t, m, runeKey('b'))
+
+	if got := m.list.FilterState(); got != list.Filtering {
+		t.Errorf("filter state = %v; want %v", got, list.Filtering)
+	}
+	if got := m.list.FilterInput.Value(); got != "b" {
+		t.Errorf("filter value = %q; want %q", got, "b")
+	}
+}
+
+func TestNavActionLettersAreFilterable(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "query"))
+
+	for _, key := range []rune{'h', 'q'} {
+		t.Run(string(key), func(t *testing.T) {
+			m := newNavModelForTest(t, root)
+			m = updateNavForTest(t, m, runeKey(key))
+
+			if got := m.list.FilterInput.Value(); got != string(key) {
+				t.Errorf("filter value = %q; want %q", got, string(key))
+			}
+			if m.quitting {
+				t.Error("model quit while entering a filter")
+			}
+		})
+	}
+}
+
+func TestNavAltHTogglesHiddenDirectories(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, ".hidden"), filepath.Join(root, "visible"))
+	m := newNavModelForTest(t, root)
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'h'}, Alt: true})
+
+	if !m.showHidden {
+		t.Error("showHidden = false; want true")
+	}
+	if got := len(m.list.Items()); got != 2 {
+		t.Errorf("directory count = %d; want 2", got)
+	}
+}
+
+func TestNavEnterSelectsFilteredDirectory(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "beta"))
+	m := newNavModelForTest(t, root)
+	m.list.SetFilterText("beta")
+	m.list.SetFilterState(list.Filtering)
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEnter})
+
+	if got, want := m.Chosen(), filepath.Join(root, "beta"); got != want {
+		t.Errorf("chosen directory = %q; want %q", got, want)
+	}
+}
+
+func TestNavArrowMovesThroughFilteredDirectories(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "alpine"), filepath.Join(root, "beta"))
+	m := newNavModelForTest(t, root)
+	m.list.SetFilterText("al")
+	m.list.SetFilterState(list.Filtering)
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyDown})
+
+	item, ok := m.list.SelectedItem().(dirItem)
+	if !ok {
+		t.Fatal("filtered list has no selected directory")
+	}
+	if got, want := item.name, "alpine"; got != want {
+		t.Errorf("selected directory = %q; want %q", got, want)
+	}
+}
+
+func TestNavEscClearsFilterBeforeQuitting(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "alpha"))
+	m := newNavModelForTest(t, root)
+	m.list.SetFilterText("alpha")
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEsc})
+	if m.quitting {
+		t.Error("first esc quit with an applied filter")
+	}
+	if got := m.list.FilterState(); got != list.Unfiltered {
+		t.Errorf("filter state = %v; want %v", got, list.Unfiltered)
+	}
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEsc})
+	if !m.quitting {
+		t.Error("second esc did not quit")
+	}
+}
+
+func TestNavTraversalResetsFilter(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "parent", "child"))
+	m := newNavModelForTest(t, root)
+	m.list.SetFilterText("parent")
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyRight})
+	assertNavFilterReset(t, m)
+
+	m.list.SetFilterText("child")
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyLeft})
+	assertNavFilterReset(t, m)
+}
+
+func assertNavFilterReset(t *testing.T, m NavModel) {
+	t.Helper()
+	if got := m.list.FilterState(); got != list.Unfiltered {
+		t.Errorf("filter state = %v; want %v", got, list.Unfiltered)
+	}
+	if got := m.list.FilterInput.Value(); got != "" {
+		t.Errorf("filter value = %q; want empty", got)
+	}
+}
+
+func runeKey(r rune) tea.KeyMsg {
+	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}}
 }
 
 func newNavModelForTest(t *testing.T, root string) NavModel {

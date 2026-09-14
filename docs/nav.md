@@ -8,7 +8,7 @@ Interactively navigate the filesystem tree and jump to the selected directory.
 kato nav
 ```
 
-The command opens a full-screen picker starting at your current working directory. Navigate with arrow keys and press `enter` to confirm — your shell will change to the highlighted directory.
+The command opens a full-screen picker starting at your current working directory. Start typing to filter the folders, navigate with arrow keys, and press `enter` to confirm — your shell will change to the highlighted directory.
 
 > **Note:** Shell integration is installed automatically by `install.sh` / `install.ps1`. After restarting your terminal, `kato nav` changes your directory directly.
 
@@ -18,12 +18,13 @@ The command opens a full-screen picker starting at your current working director
 
 | Key | Action |
 |-----|--------|
+| Any text | Filter directories by name |
 | `↑` / `↓` | Move selection up / down |
 | `→` | Descend into the selected directory |
 | `←` | Go up to the parent directory |
 | `enter` | Confirm — jump to the highlighted directory; in an empty directory, select the currently-browsed directory |
-| `h` | Toggle visibility of hidden directories (dot-prefixed) |
-| `q` / `esc` | Cancel — stay in the current directory |
+| `alt+h` | Toggle visibility of hidden directories (dot-prefixed) |
+| `esc` | Cancel or clear the filter; when unfiltered, cancel navigation |
 
 ## How Shell Integration Works
 
@@ -81,6 +82,7 @@ function kato {
 
 - Navigation starts at the current working directory (`$PWD`).
 - Only directories are shown; files are filtered out.
-- Hidden directories (names starting with `.`) are hidden by default. Press `h` to toggle them.
-- Pressing `esc` or `q` cancels without changing directory.
+- Hidden directories (names starting with `.`) are hidden by default. Press `alt+h` to toggle them.
+- The filter is reset after descending into a directory or going up to its parent.
+- Pressing `esc` when no filter is active cancels without changing directory.
 
