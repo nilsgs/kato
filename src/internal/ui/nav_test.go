@@ -80,6 +80,20 @@ func TestNavTypingStartsFilter(t *testing.T) {
 	}
 }
 
+func TestNavFilterResultsRestoreVisibleSelection(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "beta"))
+	m := newNavModelForTest(t, root)
+	m.list.SetFilterText("alpha")
+	m.list.SetFilterState(list.Filtering)
+
+	m = updateNavForTest(t, m, list.FilterMatchesMsg{})
+
+	if got := m.list.FilterState(); got != list.FilterApplied {
+		t.Errorf("filter state = %v; want %v so selection is rendered", got, list.FilterApplied)
+	}
+}
+
 func TestNavActionLettersAreFilterable(t *testing.T) {
 	root := t.TempDir()
 	mkdirAll(t, filepath.Join(root, "query"))

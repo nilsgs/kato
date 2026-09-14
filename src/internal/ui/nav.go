@@ -259,6 +259,10 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
+	if _, ok := msg.(list.FilterMatchesMsg); ok && m.list.FilterInput.Value() != "" {
+		// The default delegate hides selection while filter input is active.
+		m.list.SetFilterState(list.FilterApplied)
+	}
 	return m, cmd
 }
 
