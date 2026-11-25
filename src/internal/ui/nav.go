@@ -177,7 +177,8 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if msg.String() == "alt+h" {
+		switch msg.String() {
+		case "alt+h":
 			m.showHidden = !m.showHidden
 			dirs, err := listDirs(m.currentDir, m.showHidden)
 			if err != nil {
@@ -187,22 +188,13 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.list = newDirList(dirs)
 			m.statusMsg = ""
 			return m, nil
-		}
 
-		if m.list.FilterState() == list.Filtering {
-			switch msg.String() {
-			case "enter":
-				m.list.SetFilterState(list.FilterApplied)
-				return m.selectHighlighted()
-			case "up", "down":
-				m.list.SetFilterState(list.FilterApplied)
-			}
-			break
-		}
+		case "backspace", "ctrl+h":
+			m.updateFilter(msg)
+			return m, nil
 
-		switch msg.String() {
 		case "esc":
-			if m.list.FilterState() == list.FilterApplied {
+			if m.list.IsFiltered() {
 				m.list.ResetFilter()
 				return m, nil
 			}
@@ -249,21 +241,32 @@ func (m NavModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.statusMsg = ""
 			return m, nil
-
 		}
 
-		if msg.Type == tea.KeyRunes && !msg.Alt {
-			m.list.SetFilterState(list.Filtering)
+		if !msg.Alt && (msg.Type == tea.KeyRunes || msg.Type == tea.KeySpace) {
+			m.updateFilter(msg)
+			return m, nil
 		}
 	}
 
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
-	if _, ok := msg.(list.FilterMatchesMsg); ok && m.list.FilterInput.Value() != "" {
-		// The default delegate hides selection while filter input is active.
-		m.list.SetFilterState(list.FilterApplied)
-	}
 	return m, cmd
+}
+
+func (m *NavModel) updateFilter(msg tea.KeyMsg) {
+	previous := m.list.FilterInput.Value()
+	input, _ := m.list.FilterInput.Update(msg)
+	filter := input.Value()
+	if filter == previous {
+		return
+	}
+	if filter == "" {
+		m.list.ResetFilter()
+		return
+	}
+	// Apply matches immediately so the next key acts on the current results.
+	m.list.SetFilterText(filter)
 }
 
 func (m NavModel) selectHighlighted() (tea.Model, tea.Cmd) {
@@ -290,7 +293,7 @@ func (m NavModel) View() string {
 		body = m.list.View()
 	}
 
-	hint := navHintStyle.Render("type: filter  ↑/↓: move  →: open  ←: up  enter: select  alt+h: hidden  esc: clear/quit")
+	hint := navHintStyle.Render("type: filter  backspace: erase  ↑/↓: move  →: open  ←: up  enter: select  alt+h: hidden  esc: clear/quit")
 
 	view := header + "\n"
 	if m.list.FilterState() != list.Unfiltered {
@@ -329,7 +332,7 @@ func newDirList(dirs []string) list.Model {
 	l.SetShowStatusBar(false)
 	l.SetShowPagination(true)
 	l.SetShowHelp(false)
-	l.SetFilteringEnabled(true)
+	l.SetFilteringEnabled(false) // NavModel applies filter edits directly.
 
 	return l
 }

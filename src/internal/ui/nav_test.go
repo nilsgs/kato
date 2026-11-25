@@ -72,25 +72,60 @@ func TestNavTypingStartsFilter(t *testing.T) {
 
 	m = updateNavForTest(t, m, runeKey('b'))
 
-	if got := m.list.FilterState(); got != list.Filtering {
-		t.Errorf("filter state = %v; want %v", got, list.Filtering)
+	if got := m.list.FilterState(); got != list.FilterApplied {
+		t.Errorf("filter state = %v; want %v so selection is rendered", got, list.FilterApplied)
 	}
 	if got := m.list.FilterInput.Value(); got != "b" {
 		t.Errorf("filter value = %q; want %q", got, "b")
 	}
+	if item, ok := m.list.SelectedItem().(dirItem); !ok || item.name != "beta" {
+		t.Errorf("selected item = %v; want beta", m.list.SelectedItem())
+	}
 }
 
-func TestNavFilterResultsRestoreVisibleSelection(t *testing.T) {
+func TestNavBackspaceRestoresMatchesForNavigation(t *testing.T) {
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "alpine"), filepath.Join(root, "beta"))
+	m := newNavModelForTest(t, root)
+
+	m = updateNavForTest(t, m, runeKey('a'))
+	m = updateNavForTest(t, m, runeKey('l'))
+	m = updateNavForTest(t, m, runeKey('ø'))
+	if got := len(m.list.VisibleItems()); got != 0 {
+		t.Fatalf("visible directories after typo = %d; want 0", got)
+	}
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyBackspace})
+	if got := m.list.FilterInput.Value(); got != "al" {
+		t.Errorf("filter value = %q; want %q", got, "al")
+	}
+	if got := len(m.list.VisibleItems()); got != 2 {
+		t.Errorf("visible directories after backspace = %d; want 2", got)
+	}
+
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyDown})
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEnter})
+	if got, want := m.Chosen(), filepath.Join(root, "alpine"); got != want {
+		t.Errorf("chosen directory = %q; want %q", got, want)
+	}
+}
+
+func TestNavBackspaceClearsFinalFilterCharacter(t *testing.T) {
 	root := t.TempDir()
 	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "beta"))
 	m := newNavModelForTest(t, root)
-	m.list.SetFilterText("alpha")
-	m.list.SetFilterState(list.Filtering)
 
-	m = updateNavForTest(t, m, list.FilterMatchesMsg{})
+	m = updateNavForTest(t, m, runeKey('b'))
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyBackspace})
+	assertNavFilterReset(t, m)
+	if got := len(m.list.VisibleItems()); got != 2 {
+		t.Errorf("visible directories after clearing the filter = %d; want 2", got)
+	}
 
-	if got := m.list.FilterState(); got != list.FilterApplied {
-		t.Errorf("filter state = %v; want %v so selection is rendered", got, list.FilterApplied)
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyDown})
+	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyBackspace})
+	if item, ok := m.list.SelectedItem().(dirItem); !ok || item.name != "beta" || m.quitting {
+		t.Errorf("backspace with no filter changed the selection or quit, selected item = %v", m.list.SelectedItem())
 	}
 }
 
@@ -132,8 +167,7 @@ func TestNavEnterSelectsFilteredDirectory(t *testing.T) {
 	root := t.TempDir()
 	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "beta"))
 	m := newNavModelForTest(t, root)
-	m.list.SetFilterText("beta")
-	m.list.SetFilterState(list.Filtering)
+	m = updateNavForTest(t, m, runeKey('b'))
 
 	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -146,8 +180,8 @@ func TestNavArrowMovesThroughFilteredDirectories(t *testing.T) {
 	root := t.TempDir()
 	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "alpine"), filepath.Join(root, "beta"))
 	m := newNavModelForTest(t, root)
-	m.list.SetFilterText("al")
-	m.list.SetFilterState(list.Filtering)
+	m = updateNavForTest(t, m, runeKey('a'))
+	m = updateNavForTest(t, m, runeKey('l'))
 
 	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyDown})
 
@@ -162,16 +196,17 @@ func TestNavArrowMovesThroughFilteredDirectories(t *testing.T) {
 
 func TestNavEscClearsFilterBeforeQuitting(t *testing.T) {
 	root := t.TempDir()
-	mkdirAll(t, filepath.Join(root, "alpha"))
+	mkdirAll(t, filepath.Join(root, "alpha"), filepath.Join(root, "beta"))
 	m := newNavModelForTest(t, root)
-	m.list.SetFilterText("alpha")
+	m = updateNavForTest(t, m, runeKey('b'))
 
 	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEsc})
 	if m.quitting {
 		t.Error("first esc quit with an applied filter")
 	}
-	if got := m.list.FilterState(); got != list.Unfiltered {
-		t.Errorf("filter state = %v; want %v", got, list.Unfiltered)
+	assertNavFilterReset(t, m)
+	if got := len(m.list.VisibleItems()); got != 2 {
+		t.Errorf("visible directories after esc = %d; want 2", got)
 	}
 
 	m = updateNavForTest(t, m, tea.KeyMsg{Type: tea.KeyEsc})

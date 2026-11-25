@@ -19,12 +19,13 @@ The command opens a full-screen picker starting at your current working director
 | Key | Action |
 |-----|--------|
 | Any text | Filter directories by name |
+| `backspace` | Remove the last filter character. Deleting the final character restores all folders. |
 | `↑` / `↓` | Move selection up / down |
 | `→` | Descend into the selected directory |
 | `←` | Go up to the parent directory |
 | `enter` | Confirm — jump to the highlighted directory; in an empty directory, select the currently-browsed directory |
 | `alt+h` | Toggle visibility of hidden directories (dot-prefixed) |
-| `esc` | Cancel or clear the filter; when unfiltered, cancel navigation |
+| `esc` | Clear the filter. With no filter, exit navigation. |
 
 ## How Shell Integration Works
 
